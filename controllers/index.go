@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/joeyave/statistics-project1/templates"
 	"net/http"
-	"statistics-project1/templates"
 )
 
 func Index(c *gin.Context) {

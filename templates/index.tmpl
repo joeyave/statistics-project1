@@ -2,10 +2,12 @@
 <html>
 {{template "header" .}}
 <body>
+
 <form enctype="multipart/form-data" action="/upload" method="post">
     <input type="file" name="file"/>
     <input type="submit" value="upload"/>
+</form>
 
-    {{template "footer" .}}
+{{template "footer" .}}
 </body>
 </html>

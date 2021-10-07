@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+{{template "header" .}}
+<body>
+
+<table border="1">
+    <tr>
+        <th>№</th>
+        <th>x</th>
+    </tr>
+
+    {{range $index, $variant := .Data}}
+        <tr>
+            <td>{{ $index }}</td>
+            <td>{{ $variant }}</td>
+        </tr>
+    {{end}}
+</table>
+
+<button type="submit"><a href="/variationalSeries">Variational Series</a></button>
+
+{{template "footer" .}}
+</body>
+</html>

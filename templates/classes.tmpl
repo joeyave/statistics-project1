@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+{{template "header" .}}
+<body>
+
+<form method="post" action="/classes">
+    <input type="number" name="number"/>
+    <input type="submit" value="Do"/>
+</form>
+
+{{if .Classes}}
+    <table border="1">
+        <tr>
+            <th>№</th>
+            <th>bounds</th>
+            <th>n</th>
+            <th>p</th>
+            <th>F<sub>N</sub>(x)</th>
+        </tr>
+
+        {{range $index, $variant := .Classes}}
+            <tr>
+                <td>{{ $index }}</td>
+
+                {{if eq $index (sub (len $.Classes) 1)}}
+                    <td>[{{ $variant.XFrom }};{{ $variant.XTo }}]</td>
+                {{else}}
+                    <td>[{{ $variant.XFrom }};{{ $variant.XTo }})</td>
+                {{end}}
+                <td>{{ $variant.N }}</td>
+                <td>{{ $variant.P }}</td>
+                <td>{{ $variant.F }}</td>
+            </tr>
+        {{end}}
+    </table>
+{{end}}
+
+{{template "footer" .}}
+</body>
+</html>
