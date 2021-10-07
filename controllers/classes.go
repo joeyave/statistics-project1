@@ -5,10 +5,14 @@ import (
 	"encoding/base64"
 	"github.com/gin-gonic/gin"
 	"github.com/joeyave/statistics-project1/templates"
+	"gonum.org/v1/gonum/stat"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
+	"image/color"
+	"math"
 	"net/http"
+	"sort"
 	"strconv"
 )
 
@@ -84,6 +88,31 @@ func ClassesPost(c *gin.Context) {
 	}
 
 	p.Add(histogram)
+
+	kde := plotter.NewFunction(func(x float64) float64 {
+
+		data := Data
+		sort.Float64s(data)
+		variance := stat.Variance(data, nil)
+		stdDev := math.Sqrt(variance)
+
+		h = stdDev * math.Pow(float64(len(data)), -0.2)
+
+		kSum := 0.
+		for _, val := range Data {
+			u := (x - val) / h
+			k := 1 / math.Sqrt(2*math.Pi) * math.Exp(-(math.Pow(u, 2) / 2))
+			kSum += k
+		}
+
+		y := (1 / (float64(len(Data)) * h)) * kSum
+
+		return y
+	})
+
+	kde.Color = color.RGBA{R: 255, A: 255}
+	kde.Width = vg.Points(2)
+	p.Add(kde)
 
 	to, err := p.WriterTo(4*vg.Inch, 4*vg.Inch, "svg")
 	if err != nil {
