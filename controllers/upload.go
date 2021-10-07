@@ -5,11 +5,11 @@ import (
 	"bytes"
 	"github.com/gin-gonic/gin"
 	"github.com/joeyave/statistics-project1/templates"
-	"github.com/shopspring/decimal"
 	"net/http"
+	"strconv"
 )
 
-var Data []decimal.Decimal
+var Data []float64
 
 func Upload(c *gin.Context) {
 
@@ -27,11 +27,11 @@ func Upload(c *gin.Context) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(openedFile)
 
-	var data []decimal.Decimal
+	var data []float64
 
 	scanner := bufio.NewScanner(buf)
 	for scanner.Scan() {
-		float, err := decimal.NewFromString(scanner.Text())
+		float, err := strconv.ParseFloat(scanner.Text(), 64)
 		if err != nil {
 			return
 		}

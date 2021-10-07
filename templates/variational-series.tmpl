@@ -3,28 +3,31 @@
 {{template "header" .}}
 <body>
 
-<table border="1">
-    <tr>
-        <th>№</th>
-        <th>x</th>
-        <th>n</th>
-        <th>p</th>
-        <th>F<sub>N</sub>(x)</th>
-    </tr>
-
-    {{range $index, $variant := .Variants}}
-        <tr>
-            <td>{{ $index }}</td>
-            <td>{{ $variant.X }}</td>
-            <td>{{ $variant.N }}</td>
-            <td>{{ $variant.P }}</td>
-            <td>{{ $variant.F }}</td>
-        </tr>
-    {{end}}
-</table>
-
-<button type="button"><a href="/variationalSeriesChart">Variational Series Chart</a></button>
 <button type="button"><a href="/classes">Classes</a></button>
+
+<div style="display: flex">
+    <table border="1">
+        <tr>
+            <th>№</th>
+            <th>x</th>
+            <th>n</th>
+            <th>p</th>
+            <th>F<sub>N</sub>(x)</th>
+        </tr>
+
+        {{range $index, $variant := .Variants}}
+            <tr>
+                <td>{{ $index }}</td>
+                <td>{{ $variant.X }}</td>
+                <td>{{ $variant.N }}</td>
+                <td>{{ $variant.P }}</td>
+                <td>{{ $variant.F }}</td>
+            </tr>
+        {{end}}
+    </table>
+
+    <img src="data:image/svg+xml;base64,{{.Image}}">
+</div>
 
 {{template "footer" .}}
 </body>

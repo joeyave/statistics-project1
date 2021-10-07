@@ -31,9 +31,9 @@ func main() {
 	router.POST("/upload", controllers.Upload)
 
 	router.GET("/variationalSeries", controllers.VariationalSeries)
-	router.GET("/variationalSeriesChart", controllers.VariationalSeriesChart)
-	router.GET("/classes", controllers.Classes)
+	router.GET("/classes", controllers.ClassesGet)
 	router.POST("/classes", controllers.ClassesPost)
+
 	log.Info().Msgf("Starting Gin with mode: %s", gin.Mode())
 	err := router.Run(":8080")
 	if err != nil {
