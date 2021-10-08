@@ -25,7 +25,6 @@ func main() {
 	})
 
 	router.LoadHTMLGlob("templates/*")
-	router.Static("/static", "static")
 
 	router.GET("/index", controllers.Index)
 	router.POST("/upload", controllers.Upload)
@@ -33,6 +32,7 @@ func main() {
 	router.GET("/variationalSeries", controllers.VariationalSeries)
 	router.GET("/classes", controllers.ClassesGet)
 	router.POST("/classes", controllers.ClassesPost)
+	router.GET("/characteristics", controllers.Characteristics)
 
 	log.Info().Msgf("Starting Gin with mode: %s", gin.Mode())
 	err := router.Run(":8080")

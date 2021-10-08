@@ -4,11 +4,12 @@
 <body>
 
 <form method="post" action="/classes">
-    <input type="number" name="number"/>
+    <input type="number" name="number" value="{{.M}}"/>
+    <input type="text" name="h" value="{{.H}}"/>
     <input type="submit" value="Do"/>
 </form>
 
-<div style="display: flex">
+<div class="container">
     {{if .Classes}}
         <table border="1">
             <tr>

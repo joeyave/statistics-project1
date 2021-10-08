@@ -26,6 +26,9 @@ type Classes struct {
 	Title   string
 	Image   string
 	Classes []*Class
+
+	M int
+	H float64
 }
 
 type Class struct {
@@ -34,4 +37,17 @@ type Class struct {
 	N     int
 	P     float64
 	F     float64
+}
+
+type Characteristics struct {
+	Title           string
+	Characteristics []*Characteristic
+}
+
+type Characteristic struct {
+	Name   string
+	Val    float64
+	StdDev float64
+	From95 float64
+	To95   float64
 }

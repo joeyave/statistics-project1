@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+{{template "header" .}}
+<body>
+
+<table border="1">
+    <tr>
+        <th>name</th>
+        <th>value</th>
+        <th>std dev</th>
+        <th>95%</th>
+    </tr>
+
+    {{range $index, $variant := .Characteristics}}
+        <tr>
+            <td>{{ $variant.Name }}</td>
+            <td>{{ $variant.Val }}</td>
+            <td>{{ $variant.Val }}</td>
+            <td>[{{ $variant.From95 }};{{ $variant.To95}}]</td>
+        </tr>
+    {{end}}
+</table>
+
+{{template "footer" .}}
+</body>
+</html>

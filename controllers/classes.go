@@ -16,17 +16,18 @@ import (
 	"strconv"
 )
 
-var Classes []*templates.Class
-
 func ClassesGet(c *gin.Context) {
 	c.HTML(http.StatusOK, "classes.tmpl", nil)
 }
 
 func ClassesPost(c *gin.Context) {
 
-	number := c.PostForm("number")
+	H, err := strconv.ParseFloat(c.PostForm("h"), 64)
+	if err != nil {
+		H = 0
+	}
 
-	M, err := strconv.Atoi(number)
+	M, err := strconv.Atoi(c.PostForm("number"))
 	if err != nil {
 		return
 	}
@@ -71,8 +72,6 @@ func ClassesPost(c *gin.Context) {
 		}
 	}
 
-	Classes = classes
-
 	p := plot.New()
 
 	var variants plotter.XYs
@@ -98,6 +97,12 @@ func ClassesPost(c *gin.Context) {
 
 		h = stdDev * math.Pow(float64(len(data)), -0.2)
 
+		if H != 0. {
+			h = H
+		} else {
+			H = h
+		}
+
 		kSum := 0.
 		for _, val := range Data {
 			u := (x - val) / h
@@ -114,7 +119,7 @@ func ClassesPost(c *gin.Context) {
 	kde.Width = vg.Points(2)
 	p.Add(kde)
 
-	to, err := p.WriterTo(4*vg.Inch, 4*vg.Inch, "svg")
+	to, err := p.WriterTo(400, 400, "svg")
 	if err != nil {
 		return
 	}
@@ -127,5 +132,7 @@ func ClassesPost(c *gin.Context) {
 	c.HTML(http.StatusOK, "classes.tmpl", templates.Classes{
 		Classes: classes,
 		Image:   str,
+		M:       M,
+		H:       H,
 	})
 }

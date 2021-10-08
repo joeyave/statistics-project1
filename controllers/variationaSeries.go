@@ -8,7 +8,6 @@ import (
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/plotutil"
-	"gonum.org/v1/plot/vg"
 	"net/http"
 	"sort"
 )
@@ -92,7 +91,7 @@ func VariationalSeries(c *gin.Context) {
 		}
 	}
 
-	to, err := p.WriterTo(4*vg.Inch, 4*vg.Inch, "svg")
+	to, err := p.WriterTo(400, 400, "svg")
 	if err != nil {
 		return
 	}
