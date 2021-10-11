@@ -1,26 +1,39 @@
 <!doctype html>
 <html>
-{{template "header" .}}
+{{ template "header" . }}
 <body>
+{{ template "navbar" . }}
 
-<table border="1">
-    <tr>
-        <th>name</th>
-        <th>value</th>
-        <th>std dev</th>
-        <th>95%</th>
-    </tr>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md table-responsive">
+            <table class="table table-bordered table-sm">
+                <thead>
+                <tr>
+                    <th>name</th>
+                    <th>value</th>
+                    <th>std dev</th>
+                    <th>95%</th>
+                </tr>
+                </thead>
 
-    {{range $index, $variant := .Characteristics}}
-        <tr>
-            <td>{{ $variant.Name }}</td>
-            <td>{{ $variant.Val }}</td>
-            <td>{{ $variant.Val }}</td>
-            <td>[{{ $variant.From95 }};{{ $variant.To95}}]</td>
-        </tr>
-    {{end}}
-</table>
+                <tbody>
+                {{range $index, $variant := .Characteristics}}
+                    <tr>
+                        <td>{{ $variant.Name }}</td>
+                        <td>{{ $variant.Val }}</td>
+                        <td>{{ $variant.StdDev }}</td>
+                        <td>[{{ $variant.From }};{{ $variant.To }}]</td>
+                    </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-4 order-first order-md-last">
+            <img class="img-fluid mx-auto d-block border" src="data:image/svg+xml;base64,{{.Image}}">
+        </div>
+    </div>
 
-{{template "footer" .}}
+    {{ template "footer" . }}
 </body>
 </html>

@@ -2,23 +2,27 @@
 <html>
 {{template "header" .}}
 <body>
+{{template "navbar" .}}
 
-<button type="submit"><a href="/variationalSeries">Variational Series</a></button>
-<button type="submit"><a href="/characteristics">Characteristics</a></button>
-
-<table border="1">
-    <tr>
-        <th>№</th>
-        <th>x</th>
-    </tr>
-
-    {{range $index, $variant := .Data}}
+<div class="container-fluid">
+    <table class="table table-bordered table-sm">
+        <thead>
         <tr>
-            <td>{{ $index }}</td>
-            <td>{{ $variant }}</td>
+            <th>№</th>
+            <th>x</th>
         </tr>
-    {{end}}
-</table>
+        </thead>
+        <tbody>
+        {{range $index, $variant := .Data}}
+            <tr>
+                <td>{{ add $index 1 }}</td>
+                <td>{{ $variant }}</td>
+            </tr>
+        {{end}}
+        </tbody>
+    </table>
+
+</div>
 
 {{template "footer" .}}
 </body>

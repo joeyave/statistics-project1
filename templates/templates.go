@@ -42,12 +42,13 @@ type Class struct {
 type Characteristics struct {
 	Title           string
 	Characteristics []*Characteristic
+	Image           string
 }
 
 type Characteristic struct {
 	Name   string
 	Val    float64
 	StdDev float64
-	From95 float64
-	To95   float64
+	From   float64
+	To     float64
 }

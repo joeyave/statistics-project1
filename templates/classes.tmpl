@@ -2,43 +2,64 @@
 <html>
 {{template "header" .}}
 <body>
+{{ template "navbar" . }}
 
-<form method="post" action="/classes">
-    <input type="number" name="number" value="{{.M}}"/>
-    <input type="text" name="h" value="{{.H}}"/>
-    <input type="submit" value="Do"/>
-</form>
+<div class="container-fluid">
+    <div class="row mb-2">
+        <form method="post" action="/classes">
+            <input type="number" name="M" value="{{.M}}" id="M">
+            <input type="text" name="h" value="{{.H}}">
+            <input type="submit" value="Do"/>
+        </form>
+    </div>
 
-<div class="container">
     {{if .Classes}}
-        <table border="1">
-            <tr>
-                <th>№</th>
-                <th>bounds</th>
-                <th>n</th>
-                <th>p</th>
-                <th>F<sub>N</sub>(x)</th>
-            </tr>
+        <div class="row">
+            <div class="col-md">
+                <table class="table table-bordered table-sm">
+                    <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>bounds</th>
+                        <th>n</th>
+                        <th>p</th>
+                        <th>F<sub>N</sub>(x)</th>
+                    </tr>
+                    </thead>
 
-            {{range $index, $variant := .Classes}}
-                <tr>
-                    <td>{{ $index }}</td>
-
-                    {{if eq $index (sub (len $.Classes) 1)}}
-                        <td>[{{ $variant.XFrom }};{{ $variant.XTo }}]</td>
-                    {{else}}
-                        <td>[{{ $variant.XFrom }};{{ $variant.XTo }})</td>
+                    <tbody>
+                    {{range $index, $variant := .Classes}}
+                        <tr>
+                            <td>{{ add $index 1 }}</td>
+                            {{if eq $index (sub (len $.Classes) 1)}}
+                                <td>[{{ $variant.XFrom }};{{ $variant.XTo }}]</td>
+                            {{else}}
+                                <td>[{{ $variant.XFrom }};{{ $variant.XTo }})</td>
+                            {{end}}
+                            <td>{{ $variant.N }}</td>
+                            <td>{{ $variant.P }}</td>
+                            <td>{{ $variant.F }}</td>
+                        </tr>
                     {{end}}
-                    <td>{{ $variant.N }}</td>
-                    <td>{{ $variant.P }}</td>
-                    <td>{{ $variant.F }}</td>
-                </tr>
-            {{end}}
-        </table>
-    {{end}}
+                    </tbody>
+                </table>
+            </div>
 
-    <img src="data:image/svg+xml;base64,{{.Image}}">
+            <div class="col-md-4 order-first order-md-last">
+                <div class="d-grid gap-2">
+                    <img class="img-fluid mx-auto d-block border" src="data:image/svg+xml;base64,{{.Image}}">
+                </div>
+            </div>
+        </div>
+    {{end}}
 </div>
+
+<script>
+    let MInput = document.getElementById('M');
+    MInput.focus();
+    MInput.setSelectionRange(MInput.value.length, MInput.value.length);
+</script>
+
 {{template "footer" .}}
 </body>
 </html>

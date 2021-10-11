@@ -1,32 +1,42 @@
 <!doctype html>
 <html>
-{{template "header" .}}
+{{ template "header" . }}
 <body>
+{{ template "navbar" . }}
 
-<button type="button"><a href="/classes">Classes</a></button>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md">
+            <table class="table table-bordered table-sm">
+                <thead>
+                <tr>
+                    <th>№</th>
+                    <th>x</th>
+                    <th>n</th>
+                    <th>p</th>
+                    <th>F<sub>N</sub>(x)</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range $index, $variant := .Variants}}
+                    <tr>
+                        <td>{{ add $index 1 }}</td>
+                        <td>{{ $variant.X }}</td>
+                        <td>{{ $variant.N }}</td>
+                        <td>{{ $variant.P }}</td>
+                        <td>{{ $variant.F }}</td>
+                    </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
 
-<div class="container">
-    <table border="1">
-        <tr>
-            <th>№</th>
-            <th>x</th>
-            <th>n</th>
-            <th>p</th>
-            <th>F<sub>N</sub>(x)</th>
-        </tr>
-
-        {{range $index, $variant := .Variants}}
-            <tr>
-                <td>{{ $index }}</td>
-                <td>{{ $variant.X }}</td>
-                <td>{{ $variant.N }}</td>
-                <td>{{ $variant.P }}</td>
-                <td>{{ $variant.F }}</td>
-            </tr>
-        {{end}}
-    </table>
-
-    <img src="data:image/svg+xml;base64,{{.Image}}">
+        <div class="col-md-4 order-first order-md-last">
+            <div class="d-grid gap-2">
+                <img class="img-fluid mx-auto d-block border" src="data:image/svg+xml;base64,{{.Image}}">
+            </div>
+        </div>
+    </div>
 </div>
 
 {{template "footer" .}}
