@@ -6,10 +6,11 @@
 
 <div class="container-fluid">
     <div class="row mb-2">
-        <form method="post" action="/classes">
-            <input type="number" name="M" value="{{.M}}" id="M">
-            <input type="text" name="h" value="{{.H}}">
-            <input type="submit" value="Do"/>
+        <form class="input-group" method="post" action="/classes">
+            <input class="form-control" type="number" name="M" placeholder="number of classes" value="{{.M}}" id="M"
+                   required>
+            <input class="form-control" type="number" step="any" name="h" placeholder="h" value="{{.H}}">
+            <input class="btn btn-primary" type="submit" value="Do"/>
         </form>
     </div>
 
@@ -32,20 +33,20 @@
                         <tr>
                             <td>{{ add $index 1 }}</td>
                             {{if eq $index (sub (len $.Classes) 1)}}
-                                <td>[{{ $variant.XFrom }};{{ $variant.XTo }}]</td>
+                                <td>[{{ printf "%.6f" $variant.XFrom }};{{ printf "%.6f" $variant.XTo }}]</td>
                             {{else}}
-                                <td>[{{ $variant.XFrom }};{{ $variant.XTo }})</td>
+                                <td>[{{ printf "%.6f" $variant.XFrom }};{{ printf "%.6f" $variant.XTo }})</td>
                             {{end}}
                             <td>{{ $variant.N }}</td>
-                            <td>{{ $variant.P }}</td>
-                            <td>{{ $variant.F }}</td>
+                            <td>{{ printf "%.6f" $variant.P }}</td>
+                            <td>{{ printf "%.6f" $variant.F }}</td>
                         </tr>
                     {{end}}
                     </tbody>
                 </table>
             </div>
 
-            <div class="col-md-4 order-first order-md-last">
+            <div class="col-md-auto order-first order-md-last">
                 <div class="d-grid gap-2">
                     <img class="img-fluid mx-auto d-block border" src="data:image/svg+xml;base64,{{.Image}}">
                 </div>

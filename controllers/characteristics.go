@@ -92,9 +92,9 @@ func Characteristics(c *gin.Context) {
 		Val:  helpers.Max(data),
 	})
 
-	p := helpers.PlotPDF(data)
+	p := helpers.PlotNormalPDF(data)
 
-	writerTo, err := p.WriterTo(400, 400, "svg")
+	writerTo, err := p.WriterTo(helpers.PlotWidth, helpers.PlotHeight, "svg")
 	if err != nil {
 		return
 	}
@@ -104,8 +104,9 @@ func Characteristics(c *gin.Context) {
 
 	str := base64.StdEncoding.EncodeToString(buf.Bytes())
 
-	c.HTML(http.StatusOK, "characteristics.tmpl", templates.Characteristics{
-		Characteristics: characteristics,
-		Image:           str,
+	c.HTML(http.StatusOK, "characteristics.tmpl", map[string]interface{}{
+		"FileName":        FileName,
+		"Characteristics": characteristics,
+		"Image":           str,
 	})
 }

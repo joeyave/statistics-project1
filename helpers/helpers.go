@@ -1,14 +1,22 @@
 package helpers
 
 import (
+	"fmt"
 	"github.com/joeyave/statistics-project1/templates"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/plotutil"
 	"gonum.org/v1/plot/vg"
+	"gonum.org/v1/plot/vg/draw"
 	"image/color"
 	"math"
 	"sort"
+	"strconv"
+)
+
+const (
+	PlotWidth  = 360
+	PlotHeight = 360
 )
 
 func Variance(x []float64) float64 {
@@ -196,7 +204,28 @@ func AntiKurtosis(x []float64) float64 {
 	return antiKurtosis
 }
 
-func ECDF(x []float64) []*templates.Variant {
+func EmpiricalCDF(x []float64) func(x_i float64) float64 {
+	if !sort.Float64sAreSorted(x) {
+		sort.Float64s(x)
+	}
+
+	return func(x_i float64) float64 {
+		y := 0.
+		n := 1
+		for i := 0; i < len(x) && x[i] <= x_i; i++ {
+			if (i+1 != len(x)) && (x[i] == x[i+1]) {
+				n++
+			} else {
+				p := float64(n) / float64(len(x))
+				y += p
+				n = 1
+			}
+		}
+		return RoundFloat(y)
+	}
+}
+
+func Variants(f func(x_i float64) float64, x []float64) []*templates.Variant {
 
 	if !sort.Float64sAreSorted(x) {
 		sort.Float64s(x)
@@ -232,39 +261,24 @@ func ECDF(x []float64) []*templates.Variant {
 		variants = append(variants, &variant)
 	}
 
-	for i, v := range variants {
+	for i := range variants {
 
-		if i == 0 {
-			v.F = v.P
-		} else {
-			v.F = variants[i-1].F + v.P
-		}
+		variants[i].F = f(variants[i].X)
 	}
 
 	return variants
 }
 
-func PlotECDF(x []float64) *plot.Plot {
+func PlotEmpiricalCDF(x []float64) *plot.Plot {
 
-	variants := ECDF(x)
+	variants := Variants(EmpiricalCDF(x), x)
 
 	p := plot.New()
 	p.Add(plotter.NewGrid())
 	p.X.Label.Text = "x"
-	p.Y.Label.Text = "ECDF"
+	p.Y.Label.Text = "EmpiricalCDF"
 
 	p.Y.Min = 0
-	p.X.Min = 0
-
-	from := plotter.NewFunction(func(x_i float64) float64 {
-		if x_i < x[0] {
-			return 0
-		}
-		return math.NaN()
-	})
-	from.Color = color.RGBA{R: 255, A: 255}
-
-	p.Add(from)
 
 	for i := 0; i < len(variants)-1; i++ {
 		dot1 := plotter.XY{X: variants[i].X, Y: variants[i].F}
@@ -368,7 +382,7 @@ func KDE(h float64, x []float64) func(x float64) float64 {
 
 func PlotHistogram(M int, h float64, x []float64) *plot.Plot {
 
-	variants := ECDF(x)
+	variants := Variants(EmpiricalCDF(x), x)
 
 	p := plot.New()
 	p.X.Label.Text = "x"
@@ -406,16 +420,16 @@ func PlotHistogram(M int, h float64, x []float64) *plot.Plot {
 	return p
 }
 
-func PDF(x []float64) func(x_i float64) float64 {
+func NormalPDF(x []float64) func(x_i float64) float64 {
 	return func(x_i float64) float64 {
 		stdDev := StandardDeviation(x)
 		mean := Mean(x)
 		y := math.Pow(math.E, -0.5*math.Pow((x_i-mean)/stdDev, 2)) / stdDev * math.Sqrt(2*math.Pi)
-		return y
+		return RoundFloat(y)
 	}
 }
 
-func PlotPDF(x []float64) *plot.Plot {
+func PlotNormalPDF(x []float64) *plot.Plot {
 	// https://en.wikipedia.org/wiki/Normal_distribution
 
 	p := plot.New()
@@ -426,7 +440,7 @@ func PlotPDF(x []float64) *plot.Plot {
 
 	yMax := 0.
 	for _, v := range x {
-		y := PDF(x)(v)
+		y := NormalPDF(x)(v)
 		if y > yMax {
 			yMax = y
 		}
@@ -438,9 +452,132 @@ func PlotPDF(x []float64) *plot.Plot {
 	p.Y.Min = 0
 	p.Y.Max = yMax + yMax*0.1
 
-	pdf := plotter.NewFunction(PDF(x))
+	pdf := plotter.NewFunction(NormalPDF(x))
 
 	p.Add(pdf)
+
+	return p
+}
+
+func RayleighCDF(scale float64) func(x_i float64) float64 {
+	return func(x_i float64) float64 {
+		if x_i < 0 {
+			return 0
+		}
+		y := 1 - math.Pow(math.E, (-math.Pow(x_i, 2))/(2*math.Pow(scale, 2)))
+		return RoundFloat(y)
+	}
+}
+
+func DistributionIdentificationPlot(f func(x_i float64) float64, x []float64) *plot.Plot {
+
+	p := plot.New()
+	p.Add(plotter.NewGrid())
+
+	p.X.Label.Text = "t"
+	p.Y.Label.Text = "z"
+
+	dots := plotter.XYs{}
+	for _, val := range x {
+		y := f(val)
+		if math.IsInf(y, 0) || math.IsNaN(y) {
+			continue
+		}
+		dots = append(dots, plotter.XY{X: val, Y: y})
+	}
+
+	scatter, err := plotter.NewScatter(dots)
+	if err != nil {
+		return nil
+	}
+	scatter.GlyphStyle.Shape = draw.CrossGlyph{}
+
+	p.Add(scatter)
+
+	return p
+}
+
+func OutliersBorders(alpha float64, x []float64) (float64, float64) {
+	mean := Mean(x)
+	u := QuantileU(1 - alpha/2)
+	S := StandardDeviation(x)
+
+	a := mean - u*S
+	b := mean + u*S
+
+	return a, b
+}
+
+func Outliers(alpha float64, x []float64) []float64 {
+	a, b := OutliersBorders(alpha, x)
+
+	var outliers []float64
+	for _, val := range x {
+		if val <= a || val >= b {
+			outliers = append(outliers, val)
+		}
+	}
+
+	return outliers
+}
+
+func DeleteOutliers(alpha float64, x []float64) []float64 {
+	a, b := OutliersBorders(alpha, x)
+
+	var newX []float64
+	for _, val := range x {
+		if val > a && val < b {
+			newX = append(newX, val)
+		}
+	}
+
+	return newX
+}
+
+func PlotOutliers(alpha float64, x []float64) *plot.Plot {
+
+	a, b := OutliersBorders(alpha, x)
+
+	p := plot.New()
+	p.Add(plotter.NewGrid())
+
+	p.X.Label.Text = "index"
+	p.Y.Label.Text = "x"
+
+	p.Y.Min = Min(x)
+	if a < p.Y.Min {
+		p.Y.Min = a
+	}
+
+	p.Y.Max = Max(x)
+	if b > p.Y.Max {
+		p.Y.Max = b
+	}
+
+	aLine := plotter.NewFunction(func(x_i float64) float64 {
+		return a
+	})
+	aLine.Color = color.RGBA{R: 255, A: 255}
+	bLine := plotter.NewFunction(func(x_i float64) float64 {
+		return b
+	})
+	bLine.Color = color.RGBA{R: 255, A: 255}
+
+	p.Add(aLine, bLine)
+
+	dots := plotter.XYs{}
+	for i, val := range x {
+		dots = append(dots, plotter.XY{X: float64(i), Y: val})
+	}
+
+	scatter, err := plotter.NewScatter(dots)
+	if err != nil {
+		return nil
+	}
+
+	scatter.GlyphStyle.Shape = draw.CrossGlyph{}
+
+	p.Add(scatter)
 
 	return p
 }
@@ -484,4 +621,9 @@ func QuantileT(p, v float64) float64 {
 	g4 := (79*math.Pow(u, 9) + 779*math.Pow(u, 7) + 1482*math.Pow(u, 5) - 1920*math.Pow(u, 3) - 945*u) / 92160
 
 	return u + g1/v + g2/math.Pow(v, 2) + g3/math.Pow(v, 3) + g4/math.Pow(v, 4)
+}
+
+func RoundFloat(x float64) float64 {
+	roundedX, _ := strconv.ParseFloat(fmt.Sprintf("%.6f", x), 64)
+	return roundedX
 }

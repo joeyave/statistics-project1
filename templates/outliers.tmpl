@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+{{ template "header" . }}
+<body>
+{{ template "navbar" . }}
+
+<div class="container-fluid">
+    <form method="post" action="/outliers">
+        <div class="row mb-2">
+            <div class="input-group">
+                <input class="form-control" type="number" step="any" name="alpha" placeholder="alpha" value="{{.Alpha}}"
+                       required>
+                <input class="btn btn-primary" type="submit" value="Do"/>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md table-responsive">
+                <table class="table table-bordered table-sm">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>x</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {{range $index, $variant := .Outliers}}
+                        <tr>
+                            <td>{{ add $index 1 }}</td>
+                            <td>{{ $variant }}</td>
+                        </tr>
+                    {{end}}
+                    </tbody>
+                </table>
+
+                <button class="btn btn-danger" type="submit" name="action" value="delete-outliers">Delete outliers
+                </button>
+    </form>
+</div>
+<div class="col-md-auto order-first order-md-last">
+    <img class="img-fluid mx-auto d-block border" src="data:image/svg+xml;base64,{{.Image}}">
+</div>
+</div>
+
+{{ template "footer" . }}
+</body>
+</html>

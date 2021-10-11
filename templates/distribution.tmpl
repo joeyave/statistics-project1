@@ -23,15 +23,15 @@
                         <td>{{ add $index 1 }}</td>
                         <td>{{ $variant.X }}</td>
                         <td>{{ $variant.N }}</td>
-                        <td>{{ $variant.P }}</td>
-                        <td>{{ $variant.F }}</td>
+                        <td>{{ printf "%.6f" $variant.P }}</td>
+                        <td>{{ printf "%.6f" $variant.F }}</td>
                     </tr>
                 {{end}}
                 </tbody>
             </table>
         </div>
 
-        <div class="col-md-4 order-first order-md-last">
+        <div class="col-md-auto order-first order-md-last">
             <div class="d-grid gap-2">
                 <img class="img-fluid mx-auto d-block border" src="data:image/svg+xml;base64,{{.Image}}">
             </div>

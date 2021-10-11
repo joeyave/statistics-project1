@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"github.com/gin-gonic/gin"
 	"github.com/joeyave/statistics-project1/helpers"
-	"github.com/joeyave/statistics-project1/templates"
 	"net/http"
 	"strconv"
 )
@@ -36,7 +35,7 @@ func ClassesPost(c *gin.Context) {
 
 	p := helpers.PlotHistogram(M, h, x)
 
-	to, err := p.WriterTo(400, 400, "svg")
+	to, err := p.WriterTo(helpers.PlotWidth, helpers.PlotHeight, "svg")
 	if err != nil {
 		return
 	}
@@ -46,10 +45,11 @@ func ClassesPost(c *gin.Context) {
 
 	str := base64.StdEncoding.EncodeToString(buf.Bytes())
 
-	c.HTML(http.StatusOK, "classes.tmpl", templates.Classes{
-		Classes: classes,
-		Image:   str,
-		M:       M,
-		H:       h,
+	c.HTML(http.StatusOK, "classes.tmpl", map[string]interface{}{
+		"FileName": FileName,
+		"Classes":  classes,
+		"Image":    str,
+		"M":        M,
+		"H":        h,
 	})
 }

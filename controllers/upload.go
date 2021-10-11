@@ -4,12 +4,13 @@ import (
 	"bufio"
 	"bytes"
 	"github.com/gin-gonic/gin"
-	"github.com/joeyave/statistics-project1/templates"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 var Data []float64
+var FileName string
 
 func Upload(c *gin.Context) {
 
@@ -31,15 +32,23 @@ func Upload(c *gin.Context) {
 
 	scanner := bufio.NewScanner(buf)
 	for scanner.Scan() {
-		float, err := strconv.ParseFloat(scanner.Text(), 64)
-		if err != nil {
-			return
-		}
+		text := scanner.Text()
+		vals := strings.Fields(text)
 
-		data = append(data, float)
+		for _, val := range vals {
+			float, err := strconv.ParseFloat(val, 64)
+			if err != nil {
+				continue
+			}
+			data = append(data, float)
+		}
 	}
 
 	Data = data
+	FileName = file.Filename
 
-	c.HTML(http.StatusOK, "upload.tmpl", templates.Upload{Data: data})
+	c.HTML(http.StatusOK, "upload.tmpl", map[string]interface{}{
+		"FileName": file.Filename,
+		"Data":     data,
+	})
 }

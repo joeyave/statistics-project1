@@ -21,15 +21,15 @@
                 {{range $index, $variant := .Characteristics}}
                     <tr>
                         <td>{{ $variant.Name }}</td>
-                        <td>{{ $variant.Val }}</td>
-                        <td>{{ $variant.StdDev }}</td>
-                        <td>[{{ $variant.From }};{{ $variant.To }}]</td>
+                        <td>{{ printf "%.6f" $variant.Val }}</td>
+                        <td>{{ printf "%.6f" $variant.StdDev }}</td>
+                        <td>[{{ printf "%.6f" $variant.From }};{{ printf "%.6f" $variant.To }}]</td>
                     </tr>
                 {{end}}
                 </tbody>
             </table>
         </div>
-        <div class="col-md-4 order-first order-md-last">
+        <div class="col-md-auto order-first order-md-last">
             <img class="img-fluid mx-auto d-block border" src="data:image/svg+xml;base64,{{.Image}}">
         </div>
     </div>

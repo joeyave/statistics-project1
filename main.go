@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/joeyave/statistics-project1/controllers"
 	"github.com/rs/zerolog"
@@ -8,6 +9,7 @@ import (
 	"html/template"
 	"os"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -36,6 +38,10 @@ func main() {
 			}
 			return v.FieldByName(name).IsValid()
 		},
+		"printf": func(f string, x interface{}) string {
+			s := fmt.Sprintf(f, x)
+			return strings.TrimRight(strings.TrimRight(s, "0"), ".")
+		},
 	})
 
 	router.Static("/css", "./css")
@@ -44,10 +50,12 @@ func main() {
 	router.GET("/index", controllers.Index)
 	router.POST("/upload", controllers.Upload)
 
-	router.GET("/variationalSeries", controllers.VariationalSeries)
+	router.GET("/variationalSeries", controllers.EmpiricalDistribution)
 	router.GET("/classes", controllers.ClassesGet)
 	router.POST("/classes", controllers.ClassesPost)
 	router.GET("/characteristics", controllers.Characteristics)
+	router.Any("/outliers", controllers.Outliers)
+	router.Any("/identifyDistribution", controllers.IdentifyDistribution)
 
 	log.Info().Msgf("Starting Gin with mode: %s", gin.Mode())
 	err := router.Run(":8080")
