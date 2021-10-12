@@ -1,7 +1,6 @@
 package helpers
 
 import (
-	"fmt"
 	"github.com/joeyave/statistics-project1/templates"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
@@ -10,7 +9,6 @@ import (
 	"image/color"
 	"math"
 	"sort"
-	"strconv"
 )
 
 const (
@@ -28,7 +26,7 @@ func Variance(x []float64) float64 {
 	return sum / float64(len(x)-1)
 }
 
-func VarianceShifted(x []float64) float64 {
+func VarianceBiased(x []float64) float64 {
 	sum := 0.
 	mean := Mean(x)
 	for _, val := range x {
@@ -44,8 +42,8 @@ func StandardDeviation(x []float64) float64 {
 	return stdDev
 }
 
-func StandardDeviationShifted(x []float64) float64 {
-	variance := VarianceShifted(x)
+func StandardDeviationBiased(x []float64) float64 {
+	variance := VarianceBiased(x)
 	stdDev := math.Sqrt(variance)
 	return stdDev
 }
@@ -144,7 +142,7 @@ func Skewness(x []float64) float64 {
 		sum += math.Pow(val-mean, 3)
 	}
 
-	stdDev := StandardDeviationShifted(x)
+	stdDev := StandardDeviationBiased(x)
 
 	skewness := sum / (float64(len(x)) * math.Pow(stdDev, 3))
 	return skewness
@@ -174,7 +172,7 @@ func Kurtosis(x []float64) float64 {
 		sum += math.Pow(val-mean, 4)
 	}
 
-	stdDev := StandardDeviationShifted(x)
+	stdDev := StandardDeviationBiased(x)
 
 	kurtosis := (sum / (float64(len(x)) * math.Pow(stdDev, 4))) - 3
 	return kurtosis
@@ -220,7 +218,7 @@ func EmpiricalCDF(x []float64) func(x_i float64) float64 {
 				n = 1
 			}
 		}
-		return RoundFloat(y)
+		return y
 	}
 }
 
@@ -282,12 +280,12 @@ func PlotEmpiricalCDF(x []float64) *plot.Plot {
 	p.Y.Min = 0
 
 	longestLineLength := 0.
-	for i := 0; i < len(variants)-1; i++ {
+	for i := 0; i < len(variants); i++ {
 		dot1 := plotter.XY{X: variants[i].X, Y: variants[i].F}
 
 		dot2 := plotter.XY{}
 		if i == len(variants)-1 {
-			dot2 = plotter.XY{X: variants[len(variants)-1].X + 1, Y: 1}
+			dot2 = plotter.XY{X: variants[len(variants)-1].X, Y: 1}
 		} else {
 			dot2 = plotter.XY{X: variants[i+1].X, Y: variants[i].F}
 		}
@@ -307,27 +305,6 @@ func PlotEmpiricalCDF(x []float64) *plot.Plot {
 
 		p.Add(line, scatter)
 	}
-
-	line1, err := plotter.NewLine(plotter.XYs{
-		plotter.XY{X: variants[0].X - longestLineLength, Y: 0},
-		plotter.XY{X: variants[0].X, Y: 0},
-	})
-	if err != nil {
-		return nil
-	}
-	line2, err := plotter.NewLine(plotter.XYs{
-		plotter.XY{X: variants[len(variants)-1].X, Y: 1},
-		plotter.XY{X: variants[len(variants)-1].X + longestLineLength, Y: 1},
-	})
-	if err != nil {
-		return nil
-	}
-	scatter, err := plotter.NewScatter(plotter.XYs{line2.XYs[0]})
-	if err != nil {
-		return nil
-	}
-
-	p.Add(line1, line2, scatter)
 
 	return p
 }
@@ -360,6 +337,11 @@ func Classes(M int, x []float64) []*templates.Class {
 				if v >= classes[i].XFrom && v <= classes[i].XTo {
 					classes[i].N++
 				}
+				// TODO
+				// if (v > classes[i].XFrom || math.Abs(v-classes[i].XFrom) <= math.Pow(1, -7)) &&
+				// 	v <= classes[i].XTo {
+				// 	classes[i].N++
+				// }
 			} else {
 				if v >= classes[i].XFrom && v < classes[i].XTo {
 					classes[i].N++
@@ -389,7 +371,7 @@ func Scott(x []float64) float64 {
 	return stdDev * math.Pow(float64(len(x)), -0.2)
 }
 
-func KDE(h float64, x []float64) func(x float64) float64 {
+func KDE(width, h float64, x []float64) func(x float64) float64 {
 	return func(x_i float64) float64 {
 		if !sort.Float64sAreSorted(x) {
 			sort.Float64s(x)
@@ -404,7 +386,7 @@ func KDE(h float64, x []float64) func(x float64) float64 {
 
 		y := (1 / (float64(len(x)) * h)) * kSum
 
-		return y
+		return width * y
 	}
 }
 
@@ -415,15 +397,6 @@ func PlotHistogram(M int, h float64, x []float64) *plot.Plot {
 	p := plot.New()
 	p.X.Label.Text = "x"
 	p.Y.Label.Text = "p"
-
-	yMax := 0.
-	for _, v := range x {
-		y := KDE(h, x)(v)
-		if y > yMax {
-			yMax = y
-		}
-	}
-	p.Y.Max = yMax + 0.01
 
 	var XYs plotter.XYs
 
@@ -439,7 +412,16 @@ func PlotHistogram(M int, h float64, x []float64) *plot.Plot {
 
 	p.Add(histogram)
 
-	kde := plotter.NewFunction(KDE(h, x))
+	yMax := 0.
+	for _, v := range x {
+		y := KDE(histogram.Width, h, x)(v)
+		if y > yMax {
+			yMax = y
+		}
+	}
+	p.Y.Max = yMax + 0.01
+
+	kde := plotter.NewFunction(KDE(histogram.Width, h, x))
 
 	kde.Color = color.RGBA{R: 255, A: 255}
 	kde.Width = vg.Points(2)
@@ -453,7 +435,7 @@ func NormalPDF(x []float64) func(x_i float64) float64 {
 		stdDev := StandardDeviation(x)
 		mean := Mean(x)
 		y := math.Pow(math.E, -0.5*math.Pow((x_i-mean)/stdDev, 2)) / stdDev * math.Sqrt(2*math.Pi)
-		return RoundFloat(y)
+		return y
 	}
 }
 
@@ -495,7 +477,7 @@ func RayleighCDF(scale float64) func(x_i float64) float64 {
 			return 0
 		}
 		y := 1 - math.Pow(math.E, (-math.Pow(x_i, 2))/(2*math.Pow(scale, 2)))
-		return RoundFloat(y)
+		return (y)
 	}
 }
 
@@ -613,17 +595,23 @@ func PlotOutliers(alpha float64, x []float64) *plot.Plot {
 }
 
 func Min(x []float64) float64 {
-	if !sort.Float64sAreSorted(x) {
-		sort.Float64s(x)
+	min := x[0]
+	for i := range x {
+		if x[i] < min {
+			min = x[i]
+		}
 	}
-	return x[0]
+	return min
 }
 
 func Max(x []float64) float64 {
-	if !sort.Float64sAreSorted(x) {
-		sort.Float64s(x)
+	max := x[0]
+	for i := range x {
+		if x[i] > max {
+			max = x[i]
+		}
 	}
-	return x[len(x)-1]
+	return max
 }
 
 func QuantileU(p float64) float64 {
@@ -651,9 +639,4 @@ func QuantileT(p, v float64) float64 {
 	g4 := (79*math.Pow(u, 9) + 779*math.Pow(u, 7) + 1482*math.Pow(u, 5) - 1920*math.Pow(u, 3) - 945*u) / 92160
 
 	return u + g1/v + g2/math.Pow(v, 2) + g3/math.Pow(v, 3) + g4/math.Pow(v, 4)
-}
-
-func RoundFloat(x float64) float64 {
-	roundedX, _ := strconv.ParseFloat(fmt.Sprintf("%.10f", x), 64)
-	return roundedX
 }

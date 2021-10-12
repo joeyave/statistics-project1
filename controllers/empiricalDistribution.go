@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/base64"
 	"github.com/gin-gonic/gin"
+	"github.com/joeyave/statistics-project1/global"
 	"github.com/joeyave/statistics-project1/helpers"
 	"net/http"
 )
 
 func EmpiricalDistribution(c *gin.Context) {
 
-	x := Data
+	x := global.DataCopy()
 
 	variants := helpers.Variants(helpers.EmpiricalCDF(x), x)
 	p := helpers.PlotEmpiricalCDF(x)
@@ -30,7 +31,7 @@ func EmpiricalDistribution(c *gin.Context) {
 
 	c.HTML(http.StatusOK, "distribution.tmpl", map[string]interface{}{
 		"Variants": variants,
-		"FileName": FileName,
+		"FileName": global.FileName(),
 		"Image":    str,
 	})
 }

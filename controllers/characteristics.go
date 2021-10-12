@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"github.com/gin-gonic/gin"
+	"github.com/joeyave/statistics-project1/global"
 	"github.com/joeyave/statistics-project1/helpers"
 	"github.com/joeyave/statistics-project1/templates"
 	"net/http"
@@ -11,14 +12,14 @@ import (
 )
 
 func Characteristics(c *gin.Context) {
-	data := Data
-	sort.Float64s(data)
+	x := global.DataCopy()
+	sort.Float64s(x)
 
 	var characteristics []*templates.Characteristic
 
-	mean := helpers.Mean(data)
-	stdErr := helpers.MeanStandardError(data)
-	from, to := helpers.MeanConfidenceInterval(0.05, data)
+	mean := helpers.Mean(x)
+	stdErr := helpers.MeanStandardError(x)
+	from, to := helpers.MeanConfidenceInterval(0.05, x)
 
 	characteristics = append(characteristics, &templates.Characteristic{
 		Name:   "mean",
@@ -28,8 +29,8 @@ func Characteristics(c *gin.Context) {
 		To:     to,
 	})
 
-	median := helpers.Median(data)
-	from, to = helpers.MedianConfidenceInterval(0.05, data)
+	median := helpers.Median(x)
+	from, to = helpers.MedianConfidenceInterval(0.05, x)
 
 	characteristics = append(characteristics, &templates.Characteristic{
 		Name:   "median",
@@ -39,9 +40,9 @@ func Characteristics(c *gin.Context) {
 		To:     to,
 	})
 
-	stdDev := helpers.StandardDeviation(data)
-	stdDevStdErr := helpers.StandardDeviationStandardError(data)
-	from, to = helpers.StandardDeviationConfidenceInterval(0.05, data)
+	stdDev := helpers.StandardDeviation(x)
+	stdDevStdErr := helpers.StandardDeviationStandardError(x)
+	from, to = helpers.StandardDeviationConfidenceInterval(0.05, x)
 
 	characteristics = append(characteristics, &templates.Characteristic{
 		Name:   "standard deviation",
@@ -51,9 +52,9 @@ func Characteristics(c *gin.Context) {
 		To:     to,
 	})
 
-	skewness := helpers.Skewness(data)
-	stdErr = helpers.SkewnessStandardError(data)
-	from, to = helpers.SkewnessConfidenceInterval(0.05, data)
+	skewness := helpers.Skewness(x)
+	stdErr = helpers.SkewnessStandardError(x)
+	from, to = helpers.SkewnessConfidenceInterval(0.05, x)
 
 	characteristics = append(characteristics, &templates.Characteristic{
 		Name:   "skewness",
@@ -63,9 +64,9 @@ func Characteristics(c *gin.Context) {
 		To:     to,
 	})
 
-	kurtosis := helpers.Kurtosis(data)
-	stdErr = helpers.KurtosisStandardError(data)
-	from, to = helpers.KurtosisConfidenceInterval(0.05, data)
+	kurtosis := helpers.Kurtosis(x)
+	stdErr = helpers.KurtosisStandardError(x)
+	from, to = helpers.KurtosisConfidenceInterval(0.05, x)
 
 	characteristics = append(characteristics, &templates.Characteristic{
 		Name:   "kurtosis",
@@ -75,7 +76,7 @@ func Characteristics(c *gin.Context) {
 		To:     to,
 	})
 
-	antikurtosis := helpers.AntiKurtosis(data)
+	antikurtosis := helpers.AntiKurtosis(x)
 
 	characteristics = append(characteristics, &templates.Characteristic{
 		Name: "antikurtosis",
@@ -84,15 +85,15 @@ func Characteristics(c *gin.Context) {
 
 	characteristics = append(characteristics, &templates.Characteristic{
 		Name: "min",
-		Val:  helpers.Min(data),
+		Val:  helpers.Min(x),
 	})
 
 	characteristics = append(characteristics, &templates.Characteristic{
 		Name: "max",
-		Val:  helpers.Max(data),
+		Val:  helpers.Max(x),
 	})
 
-	p := helpers.PlotNormalPDF(data)
+	p := helpers.PlotNormalPDF(x)
 
 	writerTo, err := p.WriterTo(helpers.PlotWidth, helpers.PlotHeight, "svg")
 	if err != nil {
@@ -105,7 +106,7 @@ func Characteristics(c *gin.Context) {
 	str := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	c.HTML(http.StatusOK, "characteristics.tmpl", map[string]interface{}{
-		"FileName":        FileName,
+		"FileName":        global.FileName(),
 		"Characteristics": characteristics,
 		"Image":           str,
 	})

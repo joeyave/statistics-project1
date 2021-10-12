@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"github.com/gin-gonic/gin"
+	"github.com/joeyave/statistics-project1/global"
 	"github.com/joeyave/statistics-project1/helpers"
 	"net/http"
 	"strconv"
@@ -11,7 +12,7 @@ import (
 
 func Outliers(c *gin.Context) {
 
-	data := Data
+	data := global.DataCopy()
 
 	alpha, err := strconv.ParseFloat(c.PostForm("alpha"), 64)
 	if err != nil {
@@ -20,7 +21,7 @@ func Outliers(c *gin.Context) {
 	action := c.PostForm("action")
 	if action == "delete-outliers" {
 		data = helpers.DeleteOutliers(alpha, data)
-		Data = data
+		global.SetData(data)
 	}
 
 	outliers := helpers.Outliers(alpha, data)
@@ -37,7 +38,7 @@ func Outliers(c *gin.Context) {
 	str := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	c.HTML(http.StatusOK, "outliers.tmpl", map[string]interface{}{
-		"FileName": FileName,
+		"FileName": global.FileName(),
 		"Outliers": outliers,
 		"Alpha":    alpha,
 		"Image":    str,

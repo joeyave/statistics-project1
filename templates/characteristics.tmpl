@@ -21,7 +21,7 @@
                 {{range $index, $variant := .Characteristics}}
                     <tr>
                         <td>{{ $variant.Name }}</td>
-                        <td>{{ printf "%.10f" $variant.Val }}</td>
+                        <td>{{ $variant.Val }}</td>
                         <td>{{ printf "%.6f" $variant.StdDev }}</td>
                         <td>[{{ printf "%.6f" $variant.From }};{{ printf "%.6f" $variant.To }}]</td>
                     </tr>

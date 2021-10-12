@@ -51,8 +51,7 @@ func main() {
 	router.POST("/upload", controllers.Upload)
 
 	router.GET("/variationalSeries", controllers.EmpiricalDistribution)
-	router.GET("/classes", controllers.ClassesGet)
-	router.POST("/classes", controllers.ClassesPost)
+	router.Any("/classes", controllers.Classes)
 	router.GET("/characteristics", controllers.Characteristics)
 	router.Any("/outliers", controllers.Outliers)
 	router.Any("/identifyDistribution", controllers.IdentifyDistribution)

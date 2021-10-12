@@ -4,13 +4,11 @@ import (
 	"bufio"
 	"bytes"
 	"github.com/gin-gonic/gin"
+	"github.com/joeyave/statistics-project1/global"
 	"net/http"
 	"strconv"
 	"strings"
 )
-
-var Data []float64
-var FileName string
 
 func Upload(c *gin.Context) {
 
@@ -44,8 +42,8 @@ func Upload(c *gin.Context) {
 		}
 	}
 
-	Data = data
-	FileName = file.Filename
+	global.SetData(data)
+	global.SetFileName(file.Filename)
 
 	c.HTML(http.StatusOK, "upload.tmpl", map[string]interface{}{
 		"FileName": file.Filename,

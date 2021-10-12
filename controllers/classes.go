@@ -4,18 +4,16 @@ import (
 	"bytes"
 	"encoding/base64"
 	"github.com/gin-gonic/gin"
+	"github.com/joeyave/statistics-project1/global"
 	"github.com/joeyave/statistics-project1/helpers"
+	"math"
 	"net/http"
 	"strconv"
 )
 
-func ClassesGet(c *gin.Context) {
-	c.HTML(http.StatusOK, "classes.tmpl", nil)
-}
+func Classes(c *gin.Context) {
 
-func ClassesPost(c *gin.Context) {
-
-	x := Data
+	x := global.DataCopy()
 
 	h, err := strconv.ParseFloat(c.PostForm("h"), 64)
 	if err != nil {
@@ -24,7 +22,7 @@ func ClassesPost(c *gin.Context) {
 
 	M, err := strconv.Atoi(c.PostForm("M"))
 	if err != nil {
-		return
+		M = int(1 + 1.44*math.Log(float64(len(x))))
 	}
 
 	classes := helpers.Classes(M, x)
@@ -46,7 +44,7 @@ func ClassesPost(c *gin.Context) {
 	str := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	c.HTML(http.StatusOK, "classes.tmpl", map[string]interface{}{
-		"FileName": FileName,
+		"FileName": global.FileName(),
 		"Classes":  classes,
 		"Image":    str,
 		"M":        M,

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"github.com/gin-gonic/gin"
+	"github.com/joeyave/statistics-project1/global"
 	"github.com/joeyave/statistics-project1/helpers"
 	"math"
 	"net/http"
@@ -11,13 +12,13 @@ import (
 
 func IdentifyDistribution(c *gin.Context) {
 
-	x := Data
+	x := global.DataCopy()
 
 	variants := helpers.Variants(helpers.EmpiricalCDF(x), x)
 
 	rayleighZ := func(x_i float64) float64 {
 		y := math.Sqrt(2 * math.Log(1/(1-helpers.EmpiricalCDF(x)(x_i))))
-		return helpers.RoundFloat(y)
+		return (y)
 	}
 	p := helpers.DistributionIdentificationPlot(rayleighZ, x)
 
@@ -36,7 +37,7 @@ func IdentifyDistribution(c *gin.Context) {
 
 	c.HTML(http.StatusOK, "distribution.tmpl", map[string]interface{}{
 		"Variants": variants,
-		"FileName": FileName,
+		"FileName": global.FileName(),
 		"Image":    str,
 	})
 }
