@@ -8,7 +8,8 @@
     <form method="post" action="/outliers">
         <div class="row mb-2">
             <div class="input-group">
-                <input class="form-control" type="number" step="any" name="alpha" placeholder="alpha" value="{{.Alpha}}"
+                <input class="form-control" id="alpha" type="number" step="any" name="alpha" placeholder="alpha"
+                       value="{{.Alpha}}"
                        required>
                 <input class="btn btn-primary" type="submit" value="Do"/>
             </div>
@@ -36,12 +37,19 @@
 
                 <button class="btn btn-danger" type="submit" name="action" value="delete-outliers">Delete outliers
                 </button>
+            </div>
+            <div class="col-md-auto order-first order-md-last">
+                <img class="img-fluid mx-auto d-block border" src="data:image/svg+xml;base64,{{.Image}}">
+            </div>
+        </div>
     </form>
 </div>
-<div class="col-md-auto order-first order-md-last">
-    <img class="img-fluid mx-auto d-block border" src="data:image/svg+xml;base64,{{.Image}}">
-</div>
-</div>
+
+<script>
+    let MInput = document.getElementById('alpha');
+    MInput.focus();
+    MInput.setSelectionRange(MInput.value.length, MInput.value.length);
+</script>
 
 {{ template "footer" . }}
 </body>

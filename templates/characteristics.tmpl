@@ -12,8 +12,8 @@
                 <tr>
                     <th>name</th>
                     <th>value</th>
-                    <th>std dev</th>
-                    <th>95%</th>
+                    <th>standard deviation</th>
+                    <th>95% confidence interval</th>
                 </tr>
                 </thead>
 
@@ -21,7 +21,7 @@
                 {{range $index, $variant := .Characteristics}}
                     <tr>
                         <td>{{ $variant.Name }}</td>
-                        <td>{{ printf "%.6f" $variant.Val }}</td>
+                        <td>{{ printf "%.10f" $variant.Val }}</td>
                         <td>{{ printf "%.6f" $variant.StdDev }}</td>
                         <td>[{{ printf "%.6f" $variant.From }};{{ printf "%.6f" $variant.To }}]</td>
                     </tr>

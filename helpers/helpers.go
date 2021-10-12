@@ -5,7 +5,6 @@ import (
 	"github.com/joeyave/statistics-project1/templates"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
-	"gonum.org/v1/plot/plotutil"
 	"gonum.org/v1/plot/vg"
 	"gonum.org/v1/plot/vg/draw"
 	"image/color"
@@ -276,10 +275,13 @@ func PlotEmpiricalCDF(x []float64) *plot.Plot {
 	p := plot.New()
 	p.Add(plotter.NewGrid())
 	p.X.Label.Text = "x"
-	p.Y.Label.Text = "EmpiricalCDF"
+	p.Y.Label.Text = "f(x)"
+
+	p.Title.Text = "Empirical distribution CDF"
 
 	p.Y.Min = 0
 
+	longestLineLength := 0.
 	for i := 0; i < len(variants)-1; i++ {
 		dot1 := plotter.XY{X: variants[i].X, Y: variants[i].F}
 
@@ -290,16 +292,42 @@ func PlotEmpiricalCDF(x []float64) *plot.Plot {
 			dot2 = plotter.XY{X: variants[i+1].X, Y: variants[i].F}
 		}
 
-		err := plotutil.AddLines(p, plotter.XYs{dot1, dot2})
+		line, err := plotter.NewLine(plotter.XYs{dot1, dot2})
+		if err != nil {
+			return nil
+		}
+		if dot2.X-dot1.X > longestLineLength {
+			longestLineLength = dot2.X - dot1.X
+		}
+
+		scatter, err := plotter.NewScatter(plotter.XYs{dot1})
 		if err != nil {
 			return nil
 		}
 
-		err = plotutil.AddScatters(p, plotter.XYs{dot1})
-		if err != nil {
-			return nil
-		}
+		p.Add(line, scatter)
 	}
+
+	line1, err := plotter.NewLine(plotter.XYs{
+		plotter.XY{X: variants[0].X - longestLineLength, Y: 0},
+		plotter.XY{X: variants[0].X, Y: 0},
+	})
+	if err != nil {
+		return nil
+	}
+	line2, err := plotter.NewLine(plotter.XYs{
+		plotter.XY{X: variants[len(variants)-1].X, Y: 1},
+		plotter.XY{X: variants[len(variants)-1].X + longestLineLength, Y: 1},
+	})
+	if err != nil {
+		return nil
+	}
+	scatter, err := plotter.NewScatter(plotter.XYs{line2.XYs[0]})
+	if err != nil {
+		return nil
+	}
+
+	p.Add(line1, line2, scatter)
 
 	return p
 }
@@ -437,6 +465,8 @@ func PlotNormalPDF(x []float64) *plot.Plot {
 
 	p.X.Label.Text = "x"
 	p.Y.Label.Text = "f(x)"
+
+	p.Title.Text = "Normal distribution PDF"
 
 	yMax := 0.
 	for _, v := range x {
@@ -624,6 +654,6 @@ func QuantileT(p, v float64) float64 {
 }
 
 func RoundFloat(x float64) float64 {
-	roundedX, _ := strconv.ParseFloat(fmt.Sprintf("%.6f", x), 64)
+	roundedX, _ := strconv.ParseFloat(fmt.Sprintf("%.10f", x), 64)
 	return roundedX
 }

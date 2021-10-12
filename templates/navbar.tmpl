@@ -1,12 +1,11 @@
 {{define "navbar"}}
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top mb-2">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/index">Statistics Project 1</a>
 
             {{ if .FileName }}
-                <li class="nav-item">
-                    <a class="nav-link">{{ .FileName }}</a>
-                </li>
+                <a class="navbar-brand" href="/index">Statistics Project 1 | {{ .FileName }}</a>
+            {{ else }}
+                <a class="navbar-brand" href="/index">Statistics Project 1</a>
             {{end}}
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -30,7 +29,7 @@
                                 <li><a class="dropdown-item" href="/variationalSeries">Empirical distribution</a></li>
                                 <li><a class="dropdown-item" href="/classes">Classes</a></li>
                                 <li><a class="dropdown-item" href="/outliers">Outliers</a></li>
-                                <li><a class="dropdown-item" href="/identifyDistribution">Identify distribution</a></li>
+                                <li><a class="dropdown-item" href="/identifyDistribution">Identify rayleigh distribution</a></li>
                             </ul>
                         </li>
                     {{end}}

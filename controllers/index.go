@@ -6,5 +6,7 @@ import (
 )
 
 func Index(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.tmpl", map[string]interface{}{})
+	c.HTML(http.StatusOK, "index.tmpl", map[string]interface{}{
+		"FileName": FileName,
+	})
 }
