@@ -1,1 +1,1 @@
-web: bin/mainK
+web: bin/statistics-project1
