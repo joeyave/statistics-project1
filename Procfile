@@ -1,0 +1,1 @@
+web: bin/statistics-project1
