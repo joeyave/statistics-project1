@@ -57,7 +57,7 @@ func main() {
 	router.Any("/identifyDistribution", controllers.IdentifyDistribution)
 
 	log.Info().Msgf("Starting Gin with mode: %s", gin.Mode())
-	err := router.Run(":8080")
+	err := router.Run()
 	if err != nil {
 		log.Fatal().Msgf("Error starting Gin: %v", err)
 	}
