@@ -1,1 +1,1 @@
-web: bin/statistics-project1
+web: main.go
