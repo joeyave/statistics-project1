@@ -31,7 +31,7 @@ func Classes(c *gin.Context) {
 		h = helpers.Scott(x)
 	}
 
-	p := helpers.PlotHistogram(M, h, x)
+	p, _ := helpers.PlotHistogram(M, h, x)
 
 	to, err := p.WriterTo(helpers.PlotWidth, helpers.PlotHeight, "svg")
 	if err != nil {

@@ -34,6 +34,52 @@
         <div class="col-md-auto order-first order-md-last">
             <div class="d-grid gap-2">
                 <img class="img-fluid mx-auto d-block border" src="data:image/svg+xml;base64,{{.Image}}">
+                <div class="col-md table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead>
+                        <tr>
+                            <th>name</th>
+                            <th>value</th>
+                            <th>standard deviation</th>
+                            <th>95% confidence interval</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        {{range $index, $variant := .Characteristics}}
+                        <tr>
+                            <td>{{ $variant.Name }}</td>
+                            <td>{{ $variant.Val }}</td>
+                            <td>{{ printf "%.6f" $variant.StdDev }}</td>
+                            <td>[{{ printf "%.6f" $variant.From }};{{ printf "%.6f" $variant.To }}]</td>
+                        </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
+                </div>
+                <img class="img-fluid mx-auto d-block border" src="data:image/svg+xml;base64,{{.HistogramImage}}">
+                <img class="img-fluid mx-auto d-block border" src="data:image/svg+xml;base64,{{.EmpiricalCDFImage}}">
+                <div class="col-md table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead>
+                        <tr>
+                            <th>z</th>
+                            <th>alpha</th>
+                            <th>p</th>
+                            <th>quantile</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        <tr>
+                            <td>{{ printf "%.6f" .Z}}</td>
+                            <td>{{ printf "%.6f" .Alpha}}</td>
+                            <td>{{ printf "%.6f" .P}}</td>
+                            <td>{{.QuantileK}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

@@ -390,7 +390,7 @@ func KDE(width, h float64, x []float64) func(x float64) float64 {
 	}
 }
 
-func PlotHistogram(M int, h float64, x []float64) *plot.Plot {
+func PlotHistogram(M int, h float64, x []float64) (*plot.Plot, float64) {
 
 	variants := Variants(EmpiricalCDF(x), x)
 
@@ -407,7 +407,7 @@ func PlotHistogram(M int, h float64, x []float64) *plot.Plot {
 
 	histogram, err := plotter.NewHistogram(XYs, M)
 	if err != nil {
-		return nil
+		return nil, 0
 	}
 
 	p.Add(histogram)
@@ -427,7 +427,7 @@ func PlotHistogram(M int, h float64, x []float64) *plot.Plot {
 	kde.Width = vg.Points(2)
 	p.Add(kde)
 
-	return p
+	return p, histogram.Width
 }
 
 func NormalPDF(x []float64) func(x_i float64) float64 {
@@ -435,6 +435,13 @@ func NormalPDF(x []float64) func(x_i float64) float64 {
 		stdDev := StandardDeviation(x)
 		mean := Mean(x)
 		y := math.Pow(math.E, -0.5*math.Pow((x_i-mean)/stdDev, 2)) / stdDev * math.Sqrt(2*math.Pi)
+		return y
+	}
+}
+
+func RayleighPDF(sigma float64) func(x_i float64) float64 {
+	return func(x_i float64) float64 {
+		y := (x_i * math.Pow(math.E, -(math.Pow(x_i, 2))/(2*math.Pow(sigma, 2)))) / (math.Pow(sigma, 2))
 		return y
 	}
 }
@@ -471,12 +478,12 @@ func PlotNormalPDF(x []float64) *plot.Plot {
 	return p
 }
 
-func RayleighCDF(scale float64) func(x_i float64) float64 {
+func RayleighCDF(sigma float64) func(x_i float64) float64 {
 	return func(x_i float64) float64 {
 		if x_i < 0 {
 			return 0
 		}
-		y := 1 - math.Pow(math.E, (-math.Pow(x_i, 2))/(2*math.Pow(scale, 2)))
+		y := 1 - math.Pow(math.E, (-math.Pow(x_i, 2))/(2*math.Pow(sigma, 2)))
 		return (y)
 	}
 }
@@ -639,4 +646,92 @@ func QuantileT(p, v float64) float64 {
 	g4 := (79*math.Pow(u, 9) + 779*math.Pow(u, 7) + 1482*math.Pow(u, 5) - 1920*math.Pow(u, 3) - 945*u) / 92160
 
 	return u + g1/v + g2/math.Pow(v, 2) + g3/math.Pow(v, 3) + g4/math.Pow(v, 4)
+}
+
+func RayleighMLE(x []float64) float64 {
+	sum := 0.
+	for _, x_i := range x {
+		sum += math.Pow(x_i, 2)
+	}
+
+	return math.Sqrt(sum / float64(2*len(x)))
+}
+
+func RayleighMLEVariance(x []float64) float64 {
+	return 1 / float64(float64(len(x))*(4./math.Pow(RayleighMLE(x), 2)))
+}
+
+func RayleighMLEStandardDeviation(x []float64) float64 {
+	variance := Variance(x)
+	stdDev := math.Sqrt(variance)
+	return stdDev
+}
+
+func RayleighMLEConfidenceInterval(alpha float64, x []float64) (float64, float64) {
+	mle := RayleighMLE(x)
+	u := QuantileU(1 - alpha/2)
+
+	// https://ocw.mit.edu/ans7870/18/18.443/s15/projects/Rproject3_rmd_rayleigh_theory.html
+	variance := RayleighMLEVariance(x)
+
+	low := mle - u*math.Sqrt(variance)
+	high := mle + u*math.Sqrt(variance)
+
+	return low, high
+}
+
+func KolmogorovZ(x []float64, mle float64) float64 {
+	dPlus := 0.
+	for i := range x {
+		d := EmpiricalCDF(x)(x[i]) - RayleighCDF(mle)(x[i])
+		if d > math.Abs(dPlus) {
+			dPlus = d
+		}
+	}
+
+	dMinus := 0.
+	for i := range x {
+		if i == 0 {
+			continue
+		}
+		d := EmpiricalCDF(x)(x[i-1]) - RayleighCDF(mle)(x[i])
+		if d > math.Abs(dMinus) {
+			dMinus = d
+		}
+	}
+
+	dMax := dPlus
+	if dMinus > dMax {
+		dMax = dMinus
+	}
+
+	return math.Sqrt(float64(len(x))) * dMax
+}
+
+func KolmogorovFunction(z float64, x []float64) float64 {
+
+	// f1 := func(k float64) float64 {
+	// 	return math.Pow(k, 2) - 0.5*(1-math.Pow(-1, k))
+	// }
+	//
+	// f2 := func(k float64) float64 {
+	// 	return 5*math.Pow(k, 2) + 22 - 7.5*(1-math.Pow(-1, k))
+	// }
+	// c := func(k, z float64, x []float64) float64 {
+	// 	return 1 - (2*math.Pow(k, 2)*z)/(3*math.Sqrt(float64(len(x)))) -
+	// 		((f1(k)-4*(f1(k)+3))*math.Pow(k, 2)*math.Pow(z, 2)+8*math.Pow(k, 4)*math.Pow(z, 4))/float64(18*(len(x))) +
+	// 		((math.Pow(k, 2)*z)/(27*math.Sqrt(math.Pow(float64(len(x)), 3))))*((math.Pow(f2(k), 2)/5)-((4*(f2(k)+45)*math.Pow(k, 2)*math.Pow(z, 2))/15)+(8*math.Pow(k, 4)*math.Pow(z, 4)))
+	// }
+
+	sum := 0.
+	for i := 1; i < 6; i++ {
+		s := math.Pow(-1, float64(i)) * math.Pow(math.E, -2*math.Pow(float64(i), float64(2))*math.Pow(z, float64(2)))
+		sum += s
+	}
+
+	return 1 + 2*sum
+}
+
+func QuantileK(p float64) float64 {
+	return math.Sqrt(-(math.Log(p / 2)) / 2)
 }
