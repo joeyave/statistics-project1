@@ -32,7 +32,7 @@ func IdentifyDistribution(c *gin.Context) {
 
 	p := helpers.DistributionIdentificationPlot(func(x_i float64) float64 {
 		y := math.Sqrt(2 * math.Log(1/(1-helpers.EmpiricalCDF(x)(x_i))))
-		return (y)
+		return y
 	}, x)
 
 	line := plotter.NewFunction(func(x_i float64) float64 {

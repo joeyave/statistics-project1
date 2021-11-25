@@ -484,7 +484,7 @@ func RayleighCDF(sigma float64) func(x_i float64) float64 {
 			return 0
 		}
 		y := 1 - math.Pow(math.E, (-math.Pow(x_i, 2))/(2*math.Pow(sigma, 2)))
-		return (y)
+		return y
 	}
 }
 
@@ -497,7 +497,10 @@ func DistributionIdentificationPlot(f func(x_i float64) float64, x []float64) *p
 	p.Y.Label.Text = "z"
 
 	dots := plotter.XYs{}
-	for _, val := range x {
+	for i, val := range x {
+		if i == len(x)-1 {
+			continue
+		}
 		y := f(val)
 		if math.IsInf(y, 0) || math.IsNaN(y) {
 			continue
@@ -510,7 +513,7 @@ func DistributionIdentificationPlot(f func(x_i float64) float64, x []float64) *p
 		return nil
 	}
 	scatter.GlyphStyle.Shape = draw.CrossGlyph{}
-
+	scatter.Color = color.RGBA{R: 255, A: 255}
 	p.Add(scatter)
 
 	return p
@@ -662,7 +665,7 @@ func RayleighMLEVariance(x []float64) float64 {
 }
 
 func RayleighMLEStandardDeviation(x []float64) float64 {
-	variance := Variance(x)
+	variance := RayleighMLEVariance(x)
 	stdDev := math.Sqrt(variance)
 	return stdDev
 }
